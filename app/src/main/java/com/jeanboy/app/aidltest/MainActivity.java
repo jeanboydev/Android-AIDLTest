@@ -71,12 +71,12 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            if (iBinder instanceof ForegroundService.MyForegroundBinder) {
-                ForegroundService.MyForegroundBinder foregroundBinder = (ForegroundService.MyForegroundBinder) iBinder;
-                foregroundBinder.binderTest();
-            }
-
-            if (iBinder instanceof MyRemoteAidlInterface) {
+//            if (iBinder instanceof ForegroundService.MyForegroundBinder) {
+//                ForegroundService.MyForegroundBinder foregroundBinder = (ForegroundService.MyForegroundBinder) iBinder;
+//                foregroundBinder.binderTest();
+//            }
+//
+//            if (iBinder instanceof MyRemoteAidlInterface) {
                 MyRemoteAidlInterface aidlInterface = MyRemoteAidlInterface.Stub.asInterface(iBinder);
                 try {
                     int result = aidlInterface.testPlus(2, 5);
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
-            }
+//            }
 
             Log.e(TAG, "onServiceConnected");
         }
