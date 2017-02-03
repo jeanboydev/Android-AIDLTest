@@ -18,6 +18,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
 
+    private static final int TYPE_NORMAL = 0x0001;
+    private static final int TYPE_FOREGROUND = 0x0002;
+    private static final int TYPE_REMOTE = 0x0003;
+
+    private int serviceType = TYPE_NORMAL;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startService(View view) {
+        serviceType = TYPE_NORMAL;
         Intent intent = new Intent(this, TestService.class);
         startService(intent);
     }
@@ -45,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void bindService(View view) {
+        serviceType = TYPE_NORMAL;
         Intent intent = new Intent(this, TestService.class);
         bindService(intent, connection, BIND_AUTO_CREATE);//BIND_AUTO_CREATE 绑定自动创建service
     }
@@ -54,41 +62,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startForegroundService(View view) {
+        serviceType = TYPE_FOREGROUND;
         Intent intent = new Intent(this, ForegroundService.class);
         startService(intent);
     }
 
+
+    public void stopForegroundService(View view) {
+        stopService(new Intent(this, ForegroundService.class));
+    }
+
+
     public void startRemoteService(View view) {
+        serviceType = TYPE_REMOTE;
         Intent intent = new Intent(this, RemoteService.class);
         startService(intent);
     }
 
-    public void bindRemoteService(View view) {
-        Intent intent = new Intent(this, RemoteService.class);
-        bindService(intent, connection, BIND_AUTO_CREATE);
+    public void stopRemoteService(View view) {
+        stopService(new Intent(this, RemoteService.class));
     }
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-//            if (iBinder instanceof ForegroundService.MyForegroundBinder) {
-//                ForegroundService.MyForegroundBinder foregroundBinder = (ForegroundService.MyForegroundBinder) iBinder;
-//                foregroundBinder.binderTest();
-//            }
-//
-//            if (iBinder instanceof MyRemoteAidlInterface) {
-                MyRemoteAidlInterface aidlInterface = MyRemoteAidlInterface.Stub.asInterface(iBinder);
-                try {
-                    int result = aidlInterface.testPlus(2, 5);
-                    Log.e(TAG, "==testPlus==result===" + result);
-                    String upper = aidlInterface.toUpper("hello world!");
-                    Log.e(TAG, "==toUpper==upper===" + upper);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-//            }
-
             Log.e(TAG, "onServiceConnected");
+
+            switch (serviceType) {
+                case TYPE_NORMAL:
+                    break;
+                case TYPE_FOREGROUND:
+                    ForegroundService.MyForegroundBinder foregroundBinder = (ForegroundService.MyForegroundBinder) iBinder;
+                    foregroundBinder.binderTest();
+                    break;
+                case TYPE_REMOTE:
+                    MyRemoteAidlInterface aidlInterface = MyRemoteAidlInterface.Stub.asInterface(iBinder);
+                    try {
+                        int result = aidlInterface.testPlus(2, 5);
+                        Log.e(TAG, "==testPlus==result===" + result);
+                        String upper = aidlInterface.toUpper("hello world!");
+                        Log.e(TAG, "==toUpper==upper===" + upper);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+            }
+
         }
 
         @Override
@@ -96,5 +115,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "onServiceDisconnected");
         }
     };
+
 
 }
